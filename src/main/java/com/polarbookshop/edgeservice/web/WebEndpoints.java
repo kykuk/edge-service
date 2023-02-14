@@ -11,6 +11,7 @@ import org.springframework.web.reactive.function.server.ServerResponse;
 
 @Configuration
 public class WebEndpoints {
+	
 	@Bean
 	public RouterFunction<ServerResponse> routerFunction() {
 		return RouterFunctions.route()
@@ -20,4 +21,5 @@ public class WebEndpoints {
 						ServerResponse.status(HttpStatus.SERVICE_UNAVAILABLE).build())
 				.build();
 	}
+	
 }
