@@ -2,6 +2,8 @@ package com.polarbookshop.edgeservice.config;
 
 import reactor.core.publisher.Mono;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -23,6 +25,8 @@ import org.springframework.web.server.WebFilter;
 @EnableWebFluxSecurity
 @Configuration
 public class SecurityConfig {
+	private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
+	
 	@Bean
 	ServerOAuth2AuthorizedClientRepository authorizedClientRepository() {
 		return new WebSessionServerOAuth2AuthorizedClientRepository();
@@ -30,6 +34,7 @@ public class SecurityConfig {
 
 	@Bean
 	SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http, ReactiveClientRegistrationRepository clientRegistrationRepository) {
+		log.info(">>> Applied SecurityFilterChain Bean");
 		return http
 			.authorizeExchange(exchange -> exchange
 					.pathMatchers("/", "/*.css", "/*.js", "/favicon.ico").permitAll()
@@ -44,24 +49,23 @@ public class SecurityConfig {
 			.build();
 	}
 
-	private ServerLogoutSuccessHandler oidcLogoutSuccessHandler(
-		ReactiveClientRegistrationRepository clientRegistrationRepository) {
-		
+	private ServerLogoutSuccessHandler oidcLogoutSuccessHandler(ReactiveClientRegistrationRepository clientRegistrationRepository) {
 		var oidcLogoutSuccessHandler = new OidcClientInitiatedServerLogoutSuccessHandler(clientRegistrationRepository);
 		oidcLogoutSuccessHandler.setPostLogoutRedirectUri("{baseUrl}");
 		
 		return oidcLogoutSuccessHandler;
 	}
 	
-//	@Bean
-//	WebFilter csrfWebFilter() {
-//		return (exchange, chain) -> {
-//			log.info(exchange.getRequest().getPath().toString());
-//			exchange.getResponse().beforeCommit(() -> Mono.defer(() -> {
-//				Mono<CsrfToken> csrfToken = exchange.getAttribute(CsrfToken.class.getName());
-//				return csrfToken != null ? csrfToken.then() : Mono.empty();
-//			}));
-//			return chain.filter(exchange);
-//		};
-//	}
+	@Bean
+	WebFilter csrfWebFilter() {
+		log.info(">>> Applied csrfWebFilter");
+		return (exchange, chain) -> {
+			log.info(exchange.getRequest().getPath().toString());
+			exchange.getResponse().beforeCommit(() -> Mono.defer(() -> {
+				Mono<CsrfToken> csrfToken = exchange.getAttribute(CsrfToken.class.getName());
+				return csrfToken != null ? csrfToken.then() : Mono.empty();
+			}));
+			return chain.filter(exchange);
+		};
+	}
 }
