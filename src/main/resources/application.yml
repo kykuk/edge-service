@@ -79,6 +79,7 @@ spring:
     port: 6379
     timeout: 1s
   session:
+    store-type: redis
     timeout: 10m
     redis:
       namespace: polar:edge
@@ -107,14 +108,39 @@ resilience4j:
       default:
         timeout-duration: 5s
 
+logging:
+  group:
+    circuitbreaker: io.github.resilience4j, org.springframework.cloud.circuitbreaker
+  level:
+    circuitbreaker: info
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
+
+info:
+  system: Polar Bookshop
+
 management:
   endpoints:
     web:
       exposure:
-        include: "*"
-
-logging:
-  level:
-    '[com.polarbookshop.edgeservice]': DEBUG
-   
+        include: configprops, env, gateway, health, heapdump, info, loggers, mappings, prometheus
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,redis
+  info:
+    env:
+      enabled: true
+    java:
+      enabled: true
+    os:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}            
             

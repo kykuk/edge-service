@@ -5,7 +5,6 @@ import reactor.core.publisher.Mono;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
@@ -23,7 +22,7 @@ import org.springframework.security.web.server.csrf.CsrfToken;
 import org.springframework.web.server.WebFilter;
 
 @EnableWebFluxSecurity
-@Configuration
+//@Configuration
 public class SecurityConfig {
 	private static final Logger log = LoggerFactory.getLogger(SecurityConfig.class);
 	
@@ -37,6 +36,7 @@ public class SecurityConfig {
 		log.info(">>> Applied SecurityFilterChain Bean");
 		return http
 			.authorizeExchange(exchange -> exchange
+					.pathMatchers("/actuator/**").permitAll()
 					.pathMatchers("/", "/*.css", "/*.js", "/favicon.ico").permitAll()
 					.pathMatchers(HttpMethod.GET, "/books/**").permitAll()
 					.anyExchange().authenticated()
